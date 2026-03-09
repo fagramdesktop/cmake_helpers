@@ -32,6 +32,7 @@ option(DESKTOP_APP_USE_PACKAGED_FONTS "Use preinstalled fonts instead of bundled
 option(DESKTOP_APP_USE_PACKAGED_RLOTTIE "Find rlottie using CMake instead of bundled patched one." OFF)
 option(DESKTOP_APP_DISABLE_CRASH_REPORTS "Disable crash report generation." ${no_special_target})
 option(DESKTOP_APP_DISABLE_AUTOUPDATE "Disable autoupdate." ${disable_autoupdate})
+option(DESKTOP_APP_BUILD_PACKER "Build the Packer update signing tool." OFF)
 option(DESKTOP_APP_DISABLE_QT_PLUGINS "Disable bundled Qt plugins." OFF)
 option(DESKTOP_APP_USE_HUNSPELL_ONLY "Disable system spellchecker and use bundled Hunspell only. (For debugging purposes)" OFF)
 option(DESKTOP_APP_ASAN "Enable address sanitizer" OFF)
