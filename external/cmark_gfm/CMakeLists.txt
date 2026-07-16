@@ -62,20 +62,31 @@ block()
     # configure.
     set(CMAKE_SUPPRESS_DEVELOPER_ERRORS TRUE)
     set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS TRUE)
-    if (DEFINED CACHE{CMAKE_ERROR_DEPRECATED})
-        set(_cmark_gfm_error_deprecated "${CMAKE_ERROR_DEPRECATED}")
-        set(_cmark_gfm_has_error_deprecated TRUE)
+
+    # CMP0218 (CMake 4.0+) makes CMAKE_WARN_DEPRECATED /
+    # CMAKE_ERROR_DEPRECATED obsolete — setting them is itself a policy
+    # error. On newer CMake accept the policy and rely solely on the
+    # SUPPRESS flags above. On older CMake temporarily clear those
+    # cache variables so cmark-gfm's deprecation noise doesn't become
+    # a configure error from -Werror=deprecated.
+    if (POLICY CMP0218)
+        cmake_policy(SET CMP0218 NEW)
     else()
-        set(_cmark_gfm_has_error_deprecated FALSE)
+        if (DEFINED CACHE{CMAKE_ERROR_DEPRECATED})
+            set(_cmark_gfm_error_deprecated "${CMAKE_ERROR_DEPRECATED}")
+            set(_cmark_gfm_has_error_deprecated TRUE)
+        else()
+            set(_cmark_gfm_has_error_deprecated FALSE)
+        endif()
+        if (DEFINED CACHE{CMAKE_WARN_DEPRECATED})
+            set(_cmark_gfm_warn_deprecated "${CMAKE_WARN_DEPRECATED}")
+            set(_cmark_gfm_has_warn_deprecated TRUE)
+        else()
+            set(_cmark_gfm_has_warn_deprecated FALSE)
+        endif()
+        set(CMAKE_ERROR_DEPRECATED FALSE CACHE BOOL "" FORCE)
+        set(CMAKE_WARN_DEPRECATED FALSE CACHE BOOL "" FORCE)
     endif()
-    if (DEFINED CACHE{CMAKE_WARN_DEPRECATED})
-        set(_cmark_gfm_warn_deprecated "${CMAKE_WARN_DEPRECATED}")
-        set(_cmark_gfm_has_warn_deprecated TRUE)
-    else()
-        set(_cmark_gfm_has_warn_deprecated FALSE)
-    endif()
-    set(CMAKE_ERROR_DEPRECATED FALSE CACHE BOOL "" FORCE)
-    set(CMAKE_WARN_DEPRECATED FALSE CACHE BOOL "" FORCE)
 
     # Defensive initialisation for the specific variables cmark-gfm
     # reads without checking. Empty strings are benign for cmark-gfm's
@@ -91,15 +102,17 @@ block()
     set(LIB_SUFFIX "")                  # src/CMakeLists.txt:155 + extensions/CMakeLists.txt:69,82
 
     add_subdirectory(${third_party_loc}/cmark-gfm cmark-gfm-build EXCLUDE_FROM_ALL)
-    if (_cmark_gfm_has_error_deprecated)
-        set(CMAKE_ERROR_DEPRECATED "${_cmark_gfm_error_deprecated}" CACHE BOOL "" FORCE)
-    else()
-        unset(CMAKE_ERROR_DEPRECATED CACHE)
-    endif()
-    if (_cmark_gfm_has_warn_deprecated)
-        set(CMAKE_WARN_DEPRECATED "${_cmark_gfm_warn_deprecated}" CACHE BOOL "" FORCE)
-    else()
-        unset(CMAKE_WARN_DEPRECATED CACHE)
+    if (NOT POLICY CMP0218)
+        if (_cmark_gfm_has_error_deprecated)
+            set(CMAKE_ERROR_DEPRECATED "${_cmark_gfm_error_deprecated}" CACHE BOOL "" FORCE)
+        else()
+            unset(CMAKE_ERROR_DEPRECATED CACHE)
+        endif()
+        if (_cmark_gfm_has_warn_deprecated)
+            set(CMAKE_WARN_DEPRECATED "${_cmark_gfm_warn_deprecated}" CACHE BOOL "" FORCE)
+        else()
+            unset(CMAKE_WARN_DEPRECATED CACHE)
+        endif()
     endif()
 endblock()
 

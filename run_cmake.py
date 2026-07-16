@@ -54,7 +54,12 @@ def run(project, arguments, buildType=''):
                 if len(target) > 0:
                     cmake.append('-DDESKTOP_APP_SPECIAL_TARGET=' + target)
 
-    cmake.extend(['-Werror=dev', '-Werror=deprecated', '--warn-uninitialized', '..' if not buildType else '../..'])
+    cmake_version = subprocess.check_output(['cmake', '--version']).decode()
+    cmake_major = int(cmake_version.split()[2].split('.')[0])
+    if cmake_major >= 4:
+        cmake.extend(['-Werror=author', '-Wuninitialized', '..' if not buildType else '../..'])
+    else:
+        cmake.extend(['-Werror=dev', '-Werror=deprecated', '--warn-uninitialized', '..' if not buildType else '../..'])
     command = '"' + '" "'.join(cmake) + '"'
 
     if not os.path.exists(basePath):
